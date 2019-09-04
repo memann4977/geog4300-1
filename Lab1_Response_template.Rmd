@@ -1,0 +1,78 @@
+---
+title: 'Lab 1: Your responses'
+output:
+  github_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+```
+
+Your name: Morgan Mann
+
+In the spaces below, insert your code and/or explanation as notes. Look for the angle brackets-{like these}-for where a response is needed. You do NOT need to keep the angle brackets in your response--they're just a placeholder.
+
+When you are done, click on the arrow next to "knit" and choose "Knit to github_document"
+
+Load the data and the tidyverse package in the code chunk below
+
+```{r}
+#nstall.packages("tidyverse")
+library(tidyverse)
+daymet_cty_2005_2015<-read_csv("https://raw.githubusercontent.com/jshannon75/geog4300_lab1/master/data/Daymet_Cty_Summary_2005_2015.csv")
+```
+
+***Question 1 (4 points):** After loading the file into R, pick TWO variables and classify them as nominal, ordinal, interval, and ratio data. Justify the classification you chose in a sentence or two for each one.*
+
+CTY_NAME = Nominal
+There are no assumptions made about this category and no relationships between different county names.
+tmax = interval
+The zero on the temperature scale isn't definite, but assigned to specific value (0 F and 0 C mean two completely different temps). Ratio cannot be found.
+
+***Question 2 (4 points):** Use group_by and summarise to calculate the mean minimum temperature and mean precipitation for each year by county, also including State and Region as grouping variables. Your resulting dataset should show the value of tmin for each county in each year. Use the kable and head functions as shown above to call the resulting table.*
+
+```{r}
+temp_avg<-daymet_cty_2005_2015 %>%
+  group_by(State,Region,year)%>%
+  summarise(tmin_avg=mean(tmin),prcp_avg=mean(prcp))
+kable(head(temp_avg))
+```
+
+***Question 3 (2 points):** What if we were only interested in the South Region? Filter the data frame you created in question 2 to just include counties in this region. Then use group_by and summarise again to calculate the mean minimum temperature by year for each state. For 1 point extra credit, use the round function to include only 1 decimal point. Use kable and head to call the first few lines of the resulting table*
+
+```{r}
+avg_se<-temp_avg %>%
+  filter(Region=="South Region") 
+  table(avg_se$State)
+  
+temp_south<-avg_se %>%
+  group_by(State,Region,year) %>%
+  summarise(tmin_mean=mean(tmin_avg))
+kable(head(temp_south))
+```
+
+***Question 4 (3 points):** To visualize the trends, we could use ggplot to visualize change in mean temperature over time. Create a line plot (geom_line) showing the state means you calculated in question 3. Use the color parameter to show separate colors for each state.*
+
+```{r}
+ggplot(temp_south,aes(x=year, y=tmin_mean, color= State )) + geom_line()
+```
+
+***Question 5 (3 points):** If you wanted to look at these data as a table, you'd need to have it in wide format. Use the spread function to create a wide format version of the data frame you created in question 3. Then call the whole table using kable.*
+
+```{r}
+temp_south_table<-temp_south %>%
+  spread(year,tmin_mean)
+kable(head(temp_south_table))
+```
+
+***Question 6 (4 points):** Returning to the county table you created in question 2, filter the data to only include 2015 as a year. Then use ggplot to create a scatterplot (geom_point) for the minimum temperature and precipitation variables, coloring the points using the Region variable.*
+
+```{r}
+daymet_2015<-temp_avg %>%
+  filter(year=="2015")
+  table(daymet_2015$year)
+
+ggplot(daymet_2015,aes(x=tmin_avg,y=prcp_avg,color=Region)) + geom_point()
+```
